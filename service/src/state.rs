@@ -1,6 +1,7 @@
 use std::{collections::HashMap, time::SystemTime};
 
 use anyhow::{anyhow, Result};
+use colored::Colorize;
 
 use crate::util::ms_to_str;
 
@@ -16,7 +17,7 @@ impl ServiceState {
         ServiceState {
             idle: false,
             ts: SystemTime::now(),
-            current_state: String::from("any"),
+            current_state: format!("{} Linux", "".bright_blue()),
             track: HashMap::new(),
         }
     }
@@ -29,11 +30,11 @@ impl ServiceState {
                     return Err(anyhow!("new state is empty."));
                 }
                 self.set_state(state.to_string())?;
-                Ok(String::from("Changed state to \"{state}\""))
+                Ok(format!("Changed state to \"{state}\""))
             }
-            "state" => self.get_current_state(),
+            "total" => self.get_current_state(),
             "session" => self.get_current_session(),
-            _ => Err(anyhow!("command not covered for {msg}")),
+            _ => Ok(format!("command not covered: \"{msg}\"")),
         }
     }
 
@@ -60,7 +61,12 @@ impl ServiceState {
     fn get_current_session(&self) -> Result<String> {
         let elapsed = self.ts.elapsed()?;
         let elapsed = elapsed.as_millis();
-        Ok(format!("{}: {}", self.current_state, ms_to_str(elapsed)).to_string())
+        Ok(format!(
+            "{}: {}",
+            self.current_state,
+            ms_to_str(elapsed).bright_yellow()
+        )
+        .to_string())
     }
 
     fn get_current_state(&self) -> Result<String> {
@@ -72,6 +78,10 @@ impl ServiceState {
             None => elapsed,
         };
 
-        Ok(format!("{}: {}", self.current_state, ms_to_str(total)).to_string())
+        Ok(format!(
+            "{}: {}",
+            self.current_state,
+            ms_to_str(total).bright_yellow()
+        ))
     }
 }

@@ -32,6 +32,7 @@ name = "diligo"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "colored",
  "log",
  "simple_logger",
  "time",
