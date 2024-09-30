@@ -6,6 +6,7 @@ use time::macros::format_description;
 
 mod socket;
 mod state;
+mod util;
 
 fn main() -> Result<()> {
     SimpleLogger::new()

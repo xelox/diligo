@@ -2,6 +2,8 @@ use std::{collections::HashMap, time::SystemTime};
 
 use anyhow::{anyhow, Result};
 
+use crate::util::ms_to_str;
+
 pub struct ServiceState {
     idle: bool,
     ts: SystemTime,
@@ -29,6 +31,8 @@ impl ServiceState {
                 self.set_state(state.to_string())?;
                 Ok(String::from("Changed state to \"{state}\""))
             }
+            "state" => self.get_current_state(),
+            "session" => self.get_current_session(),
             _ => Err(anyhow!("command not covered for {msg}")),
         }
     }
@@ -51,5 +55,23 @@ impl ServiceState {
         self.current_state = new_state;
         self.ts = SystemTime::now();
         Ok(())
+    }
+
+    fn get_current_session(&self) -> Result<String> {
+        let elapsed = self.ts.elapsed()?;
+        let elapsed = elapsed.as_millis();
+        Ok(format!("{}: {}", self.current_state, ms_to_str(elapsed)).to_string())
+    }
+
+    fn get_current_state(&self) -> Result<String> {
+        let elapsed = self.ts.elapsed()?;
+        let elapsed = elapsed.as_millis();
+
+        let total = match self.track.get(&self.current_state) {
+            Some(old_dt) => elapsed + old_dt,
+            None => elapsed,
+        };
+
+        Ok(format!("{}: {}", self.current_state, ms_to_str(total)).to_string())
     }
 }
