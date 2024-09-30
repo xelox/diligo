@@ -1,8 +1,4 @@
-use std::{
-    collections::HashMap,
-    os::linux::raw::stat,
-    time::{Duration, SystemTime},
-};
+use std::{collections::HashMap, time::SystemTime};
 
 use anyhow::{anyhow, Result};
 
@@ -10,7 +6,7 @@ pub struct ServiceState {
     idle: bool,
     ts: SystemTime,
     current_state: String,
-    track: HashMap<String, Duration>,
+    track: HashMap<String, u128>,
 }
 
 impl ServiceState {
@@ -30,17 +26,29 @@ impl ServiceState {
                 if state.len() == 0 {
                     return Err(anyhow!("new state is empty."));
                 }
-                self.set_state(state.to_string());
+                self.set_state(state.to_string())?;
                 Ok(String::from("Changed state to \"{state}\""))
             }
             _ => Err(anyhow!("command not covered for {msg}")),
         }
     }
 
-    fn set_state(&mut self, state: String) -> Result<()> {
+    fn set_state(&mut self, new_state: String) -> Result<()> {
+        // mesure time elapsed since the previous state was set.
         let elapsed = self.ts.elapsed()?;
-        self.track.insert(state.clone(), elapsed);
-        self.current_state = state;
+        let elapsed = elapsed.as_millis();
+
+        // calculate new total time elapsed on the previous state.
+        let new_elapsed = match self.track.get(&self.current_state) {
+            Some(old_dt) => elapsed + old_dt,
+            None => elapsed,
+        };
+
+        // set the track hashmap for the previous state key with the new total time elapsed.
+        self.track.insert(self.current_state.clone(), new_elapsed);
+
+        // change the current_state to the `new_state` and update the ts of the last state change
+        self.current_state = new_state;
         self.ts = SystemTime::now();
         Ok(())
     }
