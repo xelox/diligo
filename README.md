@@ -47,7 +47,7 @@ If the current task it's already the new task, then it will "toggle" it by chang
 ## How I use diligo
 Although diligo is a console application, I mostly use it as a custom component to [waybar](https://github.com/Alexays/Waybar).
 Here is how it looks:
-![Waybar](https://github.com/xelox/diligo/blob/main/waybar.png?raw=true)
+![Waybar](https://github.com/xelox/diligo/blob/main/media/waybar.png?raw=true)
 The Text in the middle is the actual point.
 I also have a keybind that executes a diligo toggle command, this way it's easy to set the current task to what I really want to track: Time spend coding.
 
