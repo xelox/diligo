@@ -1,9 +1,10 @@
 use std::{collections::HashMap, time::SystemTime};
 
 use anyhow::{anyhow, Result};
-use colored::Colorize;
 
 use crate::util::ms_to_str;
+
+const DEFAULT_STATE: &str = " Arch";
 
 pub struct ServiceState {
     idle: bool,
@@ -17,7 +18,7 @@ impl ServiceState {
         ServiceState {
             idle: false,
             ts: SystemTime::now(),
-            current_state: format!("{} Linux", "".bright_blue()),
+            current_state: DEFAULT_STATE.to_string(),
             track: HashMap::new(),
         }
     }
@@ -32,10 +33,28 @@ impl ServiceState {
                 self.set_state(state.to_string())?;
                 Ok(format!("Changed state to \"{state}\""))
             }
+            msg if msg.starts_with("toggle ") => {
+                let state = &msg[7..];
+                if state.len() == 0 {
+                    return Err(anyhow!("new state is empty."));
+                }
+                self.toggle_state(state.to_string())?;
+                Ok(format!("Changed state to \"{}\"", &self.current_state))
+            }
             "total" => self.get_current_state(),
             "session" => self.get_current_session(),
             _ => Ok(format!("command not covered: \"{msg}\"")),
         }
+    }
+
+    fn toggle_state(&mut self, new_state: String) -> Result<()> {
+        let state;
+        if self.current_state == new_state {
+            state = DEFAULT_STATE.to_string();
+        } else {
+            state = new_state;
+        }
+        self.set_state(state)
     }
 
     fn set_state(&mut self, new_state: String) -> Result<()> {
@@ -61,12 +80,7 @@ impl ServiceState {
     fn get_current_session(&self) -> Result<String> {
         let elapsed = self.ts.elapsed()?;
         let elapsed = elapsed.as_millis();
-        Ok(format!(
-            "{}: {}",
-            self.current_state,
-            ms_to_str(elapsed).bright_yellow()
-        )
-        .to_string())
+        Ok(format!("{}: {}", self.current_state, ms_to_str(elapsed)).to_string())
     }
 
     fn get_current_state(&self) -> Result<String> {
@@ -78,10 +92,6 @@ impl ServiceState {
             None => elapsed,
         };
 
-        Ok(format!(
-            "{}: {}",
-            self.current_state,
-            ms_to_str(total).bright_yellow()
-        ))
+        Ok(format!("{}: {}", self.current_state, ms_to_str(total)))
     }
 }
