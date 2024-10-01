@@ -11,7 +11,7 @@ navigate inside the `./cli` directory and the `./service` directory, and in both
 ```bash
 cargo install --path .
 ```
-this will compile the binaries and install them in your `~/.cargo/bin` directory
+this will compile the binaries and install them in your `~/.cargo/bin` directory.  
 To enable the diligo daemon modify and copy the `./service/diligo_daemon_example.service` file into `/etc/systemd/system/`.
 Then enable the service by running:
 ```bash
