@@ -1,0 +1,11 @@
+[Unit]
+Description=Diligo Daemon: Track Time spent doing tasks.
+
+[Service]
+ExecStart=/home/[username]/.cargo/bin/diligo_daemon
+Restart=always
+User=[username]
+Group=[username]
+
+[Install]
+WantedBy=multi-user.target

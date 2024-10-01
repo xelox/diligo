@@ -28,7 +28,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "diligo"
+name = "diligo_daemon"
 version = "0.1.0"
 dependencies = [
  "anyhow",
